@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import cognizantLogo from "../assets/cognizant.png";
-import { DEFAULT_ENVS, DEFAULT_DOC } from "../assets/formConfig.json";
+import { loadStoredConfig } from "../utils/formConfigStore";
+
+const { DEFAULT_ENVS, DEFAULT_DOC } = loadStoredConfig();
 
 const ROLE_BG = { operative:"#fce8d5", mdm:"#d5e8f5", viewer:"#d5edd5", uam:"#ece5f0" };
 

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DEFAULT_ENVS } from "../assets/formConfig.json";
+import { loadStoredConfig } from "../utils/formConfigStore";
+
+const { DEFAULT_ENVS } = loadStoredConfig();
 
 const ROLE_BG = { operative:"#fce8d5", mdm:"#d5e8f5", viewer:"#d5edd5", uam:"#ece5f0" };
 

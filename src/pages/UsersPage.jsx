@@ -1,9 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
+import UserEdit from "./UserEdit";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
 
 const ROLE_BADGE = {
   Admin: "bg-purple-100 text-purple-700 border border-purple-300",
+  admin : "bg-purple-100 text-purple-700 border border-purple-300",
+  user: "bg-green-100 text-green-700 border border-green-300",
   User:  "bg-green-100 text-green-700 border border-green-300",
 };
 
@@ -13,6 +16,8 @@ export default function UsersPage() {
   const [error,      setError]      = useState("");
   const [search,     setSearch]     = useState("");
   const [roleFilter, setRoleFilter] = useState("All");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // ── Fetch users from API ──────────────────────────────────────────────────
   useEffect(() => {
@@ -40,7 +45,7 @@ export default function UsersPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return users.filter(u => {
-      const matchesRole   = roleFilter === "All" || u.role === roleFilter;
+      const matchesRole   = roleFilter === "All" || u.role.toLowerCase() === roleFilter;
       const matchesSearch = !q ||
         u.first_name.toLowerCase().includes(q) ||
         u.last_name.toLowerCase().includes(q)  ||
@@ -88,11 +93,14 @@ export default function UsersPage() {
         <td className="px-4 py-3 text-sm text-gray-600">{u.email}</td>
         <td className="px-4 py-3">
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${ROLE_BADGE[u.role]}`}>
-            {u.role}
+            {u.role.toLowerCase() === "admin" ? "Admin" : "User"}
           </span>
         </td>
-        <td className="px-4 py-3">
-          <button className="text-xs text-blue-400 border border-blue-400 px-2.5 py-1 rounded hover:bg-blue-400 hover:text-white transition-colors">
+        <td className="px-4 py-3 ">
+          <button
+            onClick={() => { setSelectedUser(u); setModalOpen(true); }}
+            className="text-xs text-blue-400 border border-blue-400 px-2.5 py-1 rounded hover:bg-blue-400 hover:text-white transition-colors"
+          >
             Edit
           </button>
         </td>
@@ -115,6 +123,17 @@ export default function UsersPage() {
         </button>
       </div>
 
+      {modalOpen && selectedUser && (
+        <UserEdit
+          user={selectedUser}
+          onClose={() => setModalOpen(false)}
+          onSaved={(updatedUser) => {
+            setUsers(prev => prev.map(u => u.user_id === updatedUser.user_id ? updatedUser : u));
+            setModalOpen(false);
+          }}
+        />
+      )}
+
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
         <input
@@ -128,9 +147,9 @@ export default function UsersPage() {
           {["All", "Admin", "User"].map(r => (
             <button
               key={r}
-              onClick={() => setRoleFilter(r)}
+              onClick={() => r!=="All"? setRoleFilter(r.toLowerCase()) : setRoleFilter(r)}
               className={`px-4 py-2 transition-colors ${
-                roleFilter === r
+                roleFilter === r.toLowerCase() || roleFilter === r
                   ? "bg-blue-400 text-white font-semibold"
                   : "bg-white text-gray-600 hover:bg-gray-50"
               }`}
@@ -168,8 +187,8 @@ export default function UsersPage() {
       {!loading && !error && (
         <p className="text-xs text-gray-400 mt-3">
           Showing {filtered.length} of {users.length} users ·{" "}
-          {users.filter(u => u.role === "Admin").length} Admins ·{" "}
-          {users.filter(u => u.role === "User").length} Users
+          {users.filter(u => u.role.toLowerCase() === "admin").length} Admins ·{" "}
+          {users.filter(u => u.role.toLowerCase() === "user").length} Users
         </p>
       )}
     </div>

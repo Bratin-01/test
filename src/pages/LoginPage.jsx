@@ -47,7 +47,7 @@ export default function LoginPage() {
       } else {
         console.log(json.success);
         login(json.data);
-        console.log("Navigating…")
+        // console.log("Navigating…")
         navigate("/uar-form");
       }
     } catch {
